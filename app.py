@@ -4,7 +4,7 @@ import google.genai as genai
 
 app = Flask(__name__)
 
-client = genai.Client(api_key="AIzaSyBAnW2y7hjfJjzMT75JLdvSoSzriyVZLuU")  
+client = genai.Client(api_key="ENTER YOUR API KEY")  
 
 @app.route('/')
 def index():
@@ -32,3 +32,4 @@ def chat():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
