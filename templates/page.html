@@ -115,8 +115,23 @@
                         $('#chat-body').append('<div class="chat-message bot">'+response.reply+'</div>');
                         $('#chat-body').scrollTop($('#chat-body')[0].scrollHeight);
                     },
-                    error: function(xhr,status,error){
-                        console.error("Error:"+error);
+                    error: function(xhr, status, error) {
+    console.error("Error:", error);
+    
+    var errorMessage = "Sorry, something went wrong.";
+
+    if (xhr.responseJSON && xhr.responseJSON.reply) {
+        errorMessage = xhr.responseJSON.reply;
+    }
+
+    $('#chat-body').append(
+        '<div class="chat-message bot">' + errorMessage + '</div>'
+    );
+
+    $('#chat-body').scrollTop(
+        $('#chat-body')[0].scrollHeight
+    );
+}
                     }
                 });
             }
