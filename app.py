@@ -1,35 +1,47 @@
-
 from flask import Flask, render_template, request, jsonify
-import google.genai as genai
+from google import genai
+import os
+import time
 
 app = Flask(__name__)
 
-client = genai.Client(api_key="ENTER YOUR API KEY")  
+client = genai.Client(
+    api_key=os.environ.get("GEMINI_API_KEY")
+)
 
-@app.route('/')
+
+@app.route("/")
 def index():
-    return render_template('page.html')
+    return render_template("page.html")
 
-@app.route('/chat', methods=['POST'])
+@app.route("/chat", methods=["POST"])
 def chat():
-    user_message = request.json.get('message', '')
-    max_retries = 3
-    wait_time = 2
+    try:
+        data = request.get_json()
+        user_message = data.get("message", "").strip()
 
-    for attempt in range(max_retries):
-        try:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=user_message
-            )
-            return jsonify({'reply': response.text})
-        except genai.errors.ClientError as e:
-            if e.status_code == 503 and attempt < max_retries - 1:
-                time.sleep(wait_time)
-                wait_time *= 2
-            else:
-                return jsonify({'reply': f"Error: {str(e)}"}), 503
+        if not user_message:
+            return jsonify({
+                "reply": "Please enter a message."
+            }), 400
 
-if __name__ == '__main__':
-    app.run(debug=True)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=user_message
+        )
 
+        return jsonify({
+            "reply": response.text
+        })
+
+    except Exception as e:
+        print("GEMINI ERROR:", str(e))
+
+        return jsonify({
+            "reply": "Sorry, I couldn't connect to the AI service. Please try again."
+        }), 500
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
